@@ -186,7 +186,6 @@ class vector {
      m_end = m_capacity;
      // Copy the elements from the il into the array.
      std::copy(il.begin(), il.end(), m_storage);
-    
    }
 
    //Range constructor
@@ -254,7 +253,7 @@ class vector {
   void clear(void){
     for(size_type i{0}; i < m_end; i++)
       m_storage[i].~T();
-      m_end = 0;
+    m_end = 0;
   }
 
   void push_front(const_reference st){
@@ -283,7 +282,7 @@ class vector {
     m_end++;
   }
   void pop_back(void){
-    m_storage[--m_end].~T();
+    if(m_end > 0) m_storage[--m_end].~T();
   }
 
   void pop_front(void){
@@ -297,7 +296,7 @@ class vector {
 
   //Iterator insert
   iterator insert(iterator pos_, const_reference value_){
-    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "vector::insert" };
+    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "The method 'insert' cannot access this position" };
 
     auto dif = pos_ - begin();
     
@@ -319,7 +318,7 @@ class vector {
 	
   //Constant iterator insert
   iterator insert(const_iterator pos_, const_reference value_){
-    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "vector::insert" };
+    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "The method 'insert' cannot access this position" };
 
     auto distancia = pos_ - begin();
 
@@ -338,21 +337,21 @@ class vector {
 
     return pos_;
   }
-  
+
   template <typename InputItr>
   iterator insert(iterator pos_, InputItr first_, InputItr last_){
-    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "vector::insert" };
+    if(pos_ < begin() || pos_ > end() ) throw std::out_of_range{ "The method 'insert' cannot access this range of positions" };
     
     auto dif = last_ - first_;
     auto distancia = pos_ - begin();
 
-    if(full() || (m_end+dif) > m_capacity){
-      reserve(m_capacity + dif);
-    }
+    if(full() || (m_end+dif) > m_capacity) reserve(m_capacity + dif);
+    
     m_end+=dif;
     pos_ = begin()+distancia;
-    size_type i{m_end};
-    for(auto it{end()}; it>pos_; it--, i--){
+    size_type i{m_end-1};
+
+    for(auto it{end()-1}; it>pos_; it--, i--){
       m_storage[i] = *(it-dif);
     }
 
@@ -361,32 +360,32 @@ class vector {
     } 
     return pos_;
   }
-	
-  //Doesn't work !!!
+ 
   template <typename InputItr>
   iterator insert(const_iterator pos_, InputItr first_, InputItr last_){
-    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "vector::insert" };
+    if(pos_ < begin() || pos_ > end() )  throw std::out_of_range{ "The method 'insert' cannot access this range of positions" };
     
     auto dif = last_ - first_;
     auto distancia = pos_ - begin();
 
-    if(full() || (m_end+dif) > m_capacity){
+    if(full() || (m_end+dif) > m_capacity){ 
       reserve(m_capacity + dif);
     }
-    m_end+=dif;
+
+    m_end+=dif;                                 
     pos_ = begin()+distancia;
-    size_type i{m_end};
-    for(auto it{end()}; it>pos_; it--, i--){
-      m_storage[i] = *(it-dif);
+    size_type i{m_end-1};
+       
+    for(auto it{end()-1}; it>pos_; it--, i--){    
+      m_storage[i] = *(it-dif);                   
     }
 
     for(auto i{0u}; i<dif; i++){
-      *(pos_+i) = *(first_+i);
+      *(pos_+i) = *(first_+i);    
     } 
     return pos_;
   }
-  
-  //Doesn't work !!!
+ 
   iterator insert(iterator pos_, const std::initializer_list<value_type>& ilist_){
     auto distancia = pos_ - begin();
     auto n_elem = ilist_.end() - ilist_.begin();
@@ -412,7 +411,6 @@ class vector {
     return pos_;
   }
 	
-  //Doesn't work !!!
   iterator insert(const_iterator pos_, const std::initializer_list<value_type>& ilist_){
     auto distancia = pos_ - begin();
     auto n_elem = ilist_.end() - ilist_.begin();
@@ -454,7 +452,21 @@ class vector {
 
   }
 	
-  void shrink_to_fit(void){ m_capacity = m_end; }
+  //Requests the removal of unused capacity.
+  void shrink_to_fit(void){
+    if(m_capacity > m_end){
+      T* newstorage = new T[m_end];
+
+      for(int i = 0; i < m_end; i++){
+        newstorage[i] = m_storage[i];
+      }
+
+      delete[] m_storage;
+
+      m_capacity = m_end;
+      m_storage = newstorage;
+    }
+  }
 
   void assign(size_type count_, const_reference value_){
     if(count_ <= size()){
@@ -528,7 +540,7 @@ class vector {
   iterator erase(iterator first, iterator last){
     auto dif = last - first;
 
-    if((first > last) || (first < begin() || last > end()))  throw std::out_of_range{ "vector::erase_range" };
+    if((first > last) || (first < begin() || last > end()))  throw std::out_of_range{ "The method 'erase' cannot access this range of positions" };
 
     for (iterator it = first; it < end()-dif; it++){
       *it = *(it+dif);
@@ -541,7 +553,7 @@ class vector {
   iterator erase(const_iterator first, const_iterator last){
     auto dif = last - first;
 
-    if((first > last) || (first < begin() || last > end()))  throw std::out_of_range{ "vector::erase_range" };
+    if((first > last) || (first < begin() || last > end()))  throw std::out_of_range{ "The method 'erase' cannot access this range of positions" };
 
 
     for (iterator it = first; it < end()-dif; it++){
@@ -561,7 +573,7 @@ class vector {
 	    
       return pos;
     }
-    else throw std::out_of_range{ "vector::erase" }; 
+    else throw std::out_of_range{ "The method 'erase' cannot access this position" }; 
   }
 
   iterator erase(iterator pos){
@@ -572,27 +584,47 @@ class vector {
       m_end--; 
       return pos;
    }
-   else throw std::out_of_range{ "vector::erase" }; 
+   else throw std::out_of_range{ "The method 'erase' cannot access this position" }; 
   }
 
   // [V] Element access
-  const_reference back(void) const { return m_storage[m_end - 1]; }
-  const_reference front(void) const { return m_storage[0]; }
-  reference back(void){ return m_storage[m_end - 1]; }
-  reference front(void){ return m_storage[0]; }
+  const_reference back(void) const { 
+    if(m_end > 0)
+      return m_storage[m_end - 1];
+    else throw std::out_of_range { "The method 'back' cannot access the index of last position" };
+  }
+
+  const_reference front(void) const {
+    if(m_end > 0)
+      return m_storage[0];
+    else throw std::out_of_range { "The method 'front' cannot access the index of first position" };
+  }
+
+  reference back(void){
+    if(m_end > 0)
+      return m_storage[m_end - 1];
+    else throw std::out_of_range { "The method 'back' cannot access the index of last position" };
+  }
+
+  reference front(void){
+    if(m_end > 0)
+      return m_storage[0];
+    else throw std::out_of_range { "The method 'front' cannot access the index of first position" };
+  }
+
   const_reference operator[](size_type idx) const{ return m_storage[idx];}
   reference operator[](size_type idx){ return m_storage[idx];}
 
   const_reference at(size_type idx) const{
     if (idx < size() && idx >= 0)
       return m_storage[idx]; 
-    else throw std::out_of_range {"vector::at"};
+    else throw std::out_of_range { "The method 'at' cannot access this index" };
   }
 
   reference at(size_type idx){
     if (idx < size() && idx >= 0)
         return m_storage[idx]; 
-    else throw std::out_of_range {"vector::at"};
+    else throw std::out_of_range { "The method 'at' cannot access this index" };
   }
 	
   pointer data(void){ return m_storage; }
@@ -623,9 +655,9 @@ class vector {
  private:
   bool full(void) const{ return m_capacity == m_end; }
   
-  size_type m_end; //!< The list's current size (or index past-last valid element).
-  size_type m_capacity; //!< The list's storage capacity.
-  T* m_storage; //!< The list's data storage area.
+  size_type m_end;        //!< The list's current size (or index past-last valid element).
+  size_type m_capacity;   //!< The list's storage capacity.
+  T* m_storage;           //!< The list's data storage area.
 };
 
 // [VI] Operators
