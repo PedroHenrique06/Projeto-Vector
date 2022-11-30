@@ -64,9 +64,9 @@
 // Insert a single values before pos
 #define INSERT_SINGLE_VALUE YES
 // Insert a range of elements before pos
-#define INSERT_RANGE NO
+#define INSERT_RANGE YES
 // Insert a initializer list of elements before pos
-#define INSERT_INITIALIZER NO
+#define INSERT_INITIALIZER YES
 // Erase a range of elements begining at pos
 #define ERASE_RANGE YES
 // Erase a single values at pos
