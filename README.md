@@ -1,60 +1,69 @@
-﻿
-# Projeto Vector
+# Introduction
 
-O GitHub Classroom (GHC) não oferece um mecanismo integrado para alterar **todos** os repositórios dentro de uma turma automaticamente. Por esse motivo vamos adotar a estratégia de armazenar o repositório com a descrição do projeto externamente.
+In this repo you'll find the support code for the development of the Project `sc::vector`.
+The description of the assignment may be found [**here**](docs/projeto_TAD_vector.pdf).
 
-Dessa forma é possível editar/atualizar a descrição desse projeto e código de suporte, se necessário, sem que seja necessário replicar manualmente essa alteração em cada repositório individual do GHC.
+# Organization
 
-Nesse documento vamos chamar este repositório (derivado do GHC) de repositório **Implementação Projeto Vector**. Já a descrição do projeto e código de suporte está localizada em um _repositório externo_ chamado de [**Descrição Projeto Vector**](https://github.com/selan-ufrn/projeto_vector).
+The folders and files of this project are the following:
 
-A vantagem desse novo esquema organizacional, separando a descrição do projeto da implementação, é que se for necessário atualizar algo na descrição eu o farei _uma vez_ no repositório **Descrição Projeto Vector** e vocês simplesmente baixam a nova atualização com comandos simples como `git pull`. Para continuarmos a nos beneficiar do sistema de acompanhamento de código e troca de mensagens via _pull request_ com o _branch_ `feedback` ou via a criação de _issues_, você continuará a trabalhar no repositório **Implementação Projeto Vector** que é monitorado pelo GHC. Portanto o procedimento (de integração) a ser seguido é o seguinte:
+- `source/tests/include/tm`: This is the library that provides supports for the unit tests. Do not change or delete this folder.
+- `source/tests`: This folder has the file `main.cpp` and `iterator_tests.cpp` that contains all the tests. You might want to change this file and comment out some of the tests while you have not finished all the `sc::vector`'s methods.
+- `source/include`: This is the folder in which you should add the `vector.h` file with your solution (i.e. the implementation of the class `sc::vector`).
+- `source/CMakeLists.txt: The cmake script file.
+- `README.md`: This file.
+- `docs`: This folder has a [pdf file](docs/projeto_TAD_vector.pdf) describing the vector project.
 
-1. Clone o repositório **Descrição Projeto Vector** na sua máquina.
-2. Clone o repositório **Implementação Projeto Vector** (este repo) na sua máquina.
-3. Copie o código de suporte (pastas `source` e `data`)  do repo local **Descrição Projeto Vector** para a raiz do repo local **Implementação Projeto Vector**.
-3. Quando finalizar (ou se quiser tirar uma dúvida) _"comite"_ e atualize o repositório local **Implementação Projeto Vector**.
+# Compiling
 
-Pronto, agora você pode fazer _pull request_ em `feedback` ou abrir alguma _issue_, casa queira tirar dúvidas sobre o projeto.
+This project may be compiled with [CMake](https://cmake.org). CMake is an open-source, cross-platform family of tools designed to build, test and package software. Basically, cmake reads a script (`CMakeLists.txt`) with meta-information on the project and **creates a Makefile automatically**, tailored to your system configuration.
+After that, you may run the `make` command, as usual.
+Alternatively, the same script might be used to create Xcode projects, Ninja, or Microsoft Visual Studio projects, for instance.
 
-Ao final desse processo, a implementação completa do projeto terão sido "_comitadas_" para o repo **Implementação Projeto Vector** no GHC. Esse é o repo com seu trabalho que será baixado para avaliação.
+CMake supports **out-of-source** build. This means the _source code_ is stored in **one** folder and the _generated executable files_ should be stored in **another** folder: project should never mix-up the source tree with the build tree.
 
-## Compilando o Código de Suporte
+In particular, this project creates a single **target** (executable), called `run_tests`.
 
-Primeiramente, certifique-se de ter copiado o código de suporte (`data` e `source`) do repo local **Descrição Projeto Vector** para a raiz do repo local **Implementação Projeto Vector**. Feito isso, para compilar e executar, é só seguir as instruções abaixo.
+But don't worry, they are already set up in the `CMakeLists.txt` script.
 
-## Usando `cmake`
+To compile this project with [cmake](https://cmake.org) follow these steps (from the root folder):
 
-A partir da pasta principal do repo local **Implementação Projeto Vector** faça:
+1. `cmake -S source -B build`: asks cmake to create the build directory and generate the Unix Makefile based on the script found in `source/CMakeLists.txt`, on the current level.
+2. `cmake --build build`: triggers the compiling process that creates both targets (executable).D inside `build`.
 
-```
-cmake -S source -B build
-cmake --build build
-```
-Logo após a compilação, para executar os testes gerado use os comandos:
+The executable is created inside the `build` directory.
 
-No linux:
+For further details, please refer to the [cmake documentation website](https://cmake.org/cmake/help/v3.14/manual/cmake.1.html).
 
-```
-cd build
-make run_tests
-```
+We have in this project two batches of tests: 31 unit tests for the `sc::vector` class, and 16 unit tests for the `sc::vector::iterator` class. You should try to get passed all these tests.
 
-## Usando compilação manual com g++
+All tests begin **deactivated** by default, via a [_conditional preprocessing block_](https://en.cppreference.com/w/cpp/preprocessor/conditional) marked with a `#ifdef SOMETHING` ... `#endif`.
+To activate a test you need to turn on the test by changing the test indicator from `NO` to `YES` inside the files `vector_tests.h` (to control the vector tests), and `iterator_test.cpp` (to control the iterator tests).
+For example, to active the default constructor test the code will become this:
 
-É possível compilar o programa "na mão" (i.e. sem o `cmake`) usando o `g++`. Para isso use o comando abaixo a partir da pasta principal do repo local **Implementação Projeto Vector**:
-
-```
-mkdir -p build
-g++ -Wall -std=c++11 -I source/include -I source/tmanager_lib source/tests/main.cpp source/tmanager_lib/test_manager.cpp -o build/run_tests
+```c++
+// Test default ctro's size and capacity initial values.
+#define DEFAULT_CTRO YES  // Change it to YES to activate the test.
 ```
 
-Logo após a compilação, para executar os testes gerado use os comandos:
+## Compiling without cmake
 
-No linux:
+If you wish to compile this project without the cmake, create the `build` folder manually (`mkdir build`), then try to run the command below from the source folder:
+
 ```
-./build/run_tests
+g++ -Wall -std=c++11 -I source/include -I source/tests/include/tm/ source/tests/main.cpp source/tests/include/tm/test_manager.cpp source/tests/iterator_tests.cpp -o build/run_tests
 ```
-No windows:
+
+# Running
+
+From the project's root folder, run as usual (assuming `$` is the terminal prompt):
+
 ```
-.\Debug\run_tests.exe
+$ ./build/run_tests
 ```
+
+# Authorship
+
+Program developed by Selan (<selan.santos@ufrn.br>), 2022.2
+
+&copy; DIMAp/UFRN 2016-2022.
