@@ -67,3 +67,8 @@ $ ./build/run_tests
 Program developed by Selan (<selan.santos@ufrn.br>), 2022.2
 
 &copy; DIMAp/UFRN 2016-2022.
+
+# Implementation authors
+
++ Pedro Henrique Sales dos Santos
++ Igor Rauan Soares da Silva
